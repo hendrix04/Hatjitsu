@@ -1,0 +1,33 @@
+name: Nightly Build
+
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      #
+      # Checkout
+      #
+      - name: checkout code
+        uses: actions/checkout@v2
+        with:
+          path: .
+      #
+      # Login to Docker Hub
+      #
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      #
+      # Build
+      #
+      - name: build the image
+        working-directory: ./
+        run: |
+          docker build --push --no-cache \
+            --tag hendrix04/Hatjitsu:latest \
+            --build-arg COMMIT=$(git rev-parse HEAD) \
+            --platform linux/amd64 .
