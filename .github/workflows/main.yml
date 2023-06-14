@@ -1,36 +1,24 @@
-name: Master Build
+name: Publish Master
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
 
 on: workflow_dispatch
 
 jobs:
-  build:
+  docker-build-tag-push:
     runs-on: ubuntu-latest
+    name: Docker Build, Tag & Publish
     steps:
-      #
-      # Checkout
-      #
-      - name: checkout code
-        uses: actions/checkout@v2
-        with:
-          path: .
-      # Workaround: https://github.com/docker/build-push-action/issues/461
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@79abd3f86f79a9d68a23c75a09a9a85889262adf
-      #
-      # Login to Docker Hub
-      #
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
+      - name: Build, Tag & Publish Image to DockerHub
+        uses: dinushchathurya/build-tag-push-action@v1.2.1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      #
-      # Build
-      #
-      - name: build the image
-        working-directory: ./
-        run: |
-          docker build --push --no-cache \
-            --tag hendrix04/Hatjitsu:latest \
-            --build-arg COMMIT=$(git rev-parse HEAD) \
-            --platform linux/amd64 .
+          context: .
+          file: Dockerfile
+          repoOwner: ${{ secrets.DOCKER_USERNAME }}
+          repository:  hatjitsu
+          tag: latest
